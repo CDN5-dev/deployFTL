@@ -1,0 +1,114 @@
+Terraform.lock.hcl ===> ensures that the terraform version for the prohect is frozen, so that you can ensure that everytime you use the code it always uses the same version from the provider
+
+
+.tf files are processed as if they're all one file
+So you can create a bunch of different modules/components but they're all going tobe processeed as if the'yre the same contiguous file (as long as they're all in the same directory)
+
+
+AWS tab --> Resources --> EC2::VPC
+
+terraform.tf.state -- same information as if you looked into EC2 Resources
+
+
+terminal --> terraform state list
+
+terminal --> terraform state show aws_vpc.mtc_vpc
+
+terminal --> terraform show ( shows everything in environment)
+
+terminal --> terraform state show <resource>
+(shows everything aboutn a specific resource)
+
+terminal --> terraform plan -destroy
+(will show you in plan format everything terraform will destroy)
+
+terminal --> terraform destroy -auto-approve
+(no yes confirmation to confirm)
+
+terminal --> terraform apply -auto-approve
+
+
+terminal --> terraform fmt
+(auto-corrects any type of inconsistencies we have in our formatting)
+
+Datasource --> AWS query to supply info about
+
+
+--- Terraform File Function -----
+
+
+
+
+
+===== Scaffold and deploy EC2 instance
+
+
+
+Utilize Userdata to bootstrap our instance and install the Docker engine
+
+terminal --> terraform state show aws_instance.dev_node
+
+terminal --> ssh -i ~/.ssh/mtckey ubuntu@<puiblic ip address>
+
+
+
+terminal --> terraform apply -replace
+
+terminal --> terraform console
+
+var.host_os
+
+
+A variable set in the terraform.tfvars file has precedence over a variable of the same name in a variables.tf file
+
+
+Terraform Variable precedence:
+https://www.terraform.io/language/values/variables
+
+
+
+<EXAMPLE>
+terminal --> terraform console -ver="host_os=unix"
+
+{specifty the variable value in line in the terminal and it will override and value for this variable in any other file. Allows you a way to override anything.)
+
+
+<EXAMPLE>
+terminal ---> terraform console var-file="dev.tfvars"
+
+{instead of overriding variable inline in the command you can instead (still using the terminal) provide a file with the variable/variables override}
+ 
+
+Conditional Expressions --> Dev environment dynamic based on the host OS we're using
+
+https://www.terraform.io/language/expressions/conditionals
+
+interpreter = var.host_os == "windows" ? ["Powershell", "-Command"] : ["bash", "-c"]
+
+
+Outputs
+
+https://www.terraform.io/language/values/outputs
+
+terminal ---> terraform console
+
+terminal ---> aws_instance.dev_node.public_ip
+
+
+To see all the properties (key:value) you can access from the terraform console
+
+terminal ---> terraform state show aws_instance.dev_node
+
+
+-- Updates the values in the instance that have changed without destroying and rebuilding the entire things
+terminal ---> terraform apply -refresh-only
+
+
+terminal ---> terraform output
+
+
+in terraform.tfstate file when instance is up and running it contains all the live active values and attributes that terraform managed/ is managing.
+
+if you look at the output in the file you can see the outputs you have personally assigned/automated for listed under "outputs" as well.
+
+

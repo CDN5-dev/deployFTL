@@ -55,7 +55,7 @@ resource "aws_security_group" "mtc_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["131.210.229.75/32"] #cidr_blocks expects a list meaning you can specify multiple IP addresses in square brackets
+    cidr_blocks = ["72.133.154.94/32"] #cidr_blocks expects a list meaning you can specify multiple IP addresses in square brackets
   }
 
   egress {
@@ -63,6 +63,10 @@ resource "aws_security_group" "mtc_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "dev-sg"
   }
 }
 
@@ -77,7 +81,7 @@ resource "aws_instance" "dev_node" {
   key_name               = aws_key_pair.mtc_auth.id # key_name = mtckey
   vpc_security_group_ids = [aws_security_group.mtc_sg.id]
   subnet_id              = aws_subnet.mtc_public_subnet.id
-  user_data              = file("userdata.tpl")
+  user_data              = file("userdata.sh")
 
   # upgrade storage to 10GB instead of default 8GB
   root_block_device {
@@ -89,12 +93,12 @@ resource "aws_instance" "dev_node" {
   }
 
   provisioner "local-exec" {
-    command = templatefile("linux-ssh-config.sh", {
+    command = templatefile("${var.host_os}-ssh-config.tpl", {
       hostname     = self.public_ip,
       user         = "ubuntu",
       identityfile = "~/.ssh/mtckey"
     })
-    interpreter = ["bash", "-c"]
+    interpreter = var.host_os == "windows" ? ["Powershell", "-Command"] : ["bash", "-c"]
   }
 
 }
